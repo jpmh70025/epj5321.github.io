@@ -1,0 +1,11 @@
+.topbar{
+ display:flex;
+ gap:8px;
+ margin-bottom:10px;
+}
+
+select{
+ flex:1;
+ padding:8px;
+ border-radius:8px;
+}
