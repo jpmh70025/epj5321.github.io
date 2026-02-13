@@ -31,6 +31,26 @@ function refreshCharacters(){
 
  select.innerHTML="";
 
+ const names = Object.keys(characters);
+
+ names.forEach(name=>{
+   const opt = document.createElement("option");
+   opt.value = name;
+   opt.textContent = name;
+   select.appendChild(opt);
+ });
+
+ if(names.length > 0){
+   current = names[names.length-1];
+   select.value = current;
+ }
+
+ loadChat();
+}
+
+
+ select.innerHTML="";
+
  for(let name in characters){
    const opt=document.createElement("option");
    opt.value=name;
@@ -149,4 +169,5 @@ function send(){
 
 // ====== INIT ======
 refreshCharacters();
+
 
