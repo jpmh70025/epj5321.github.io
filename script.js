@@ -1,3 +1,4 @@
+// ===== VARIABLES =====
 const chat = document.getElementById("chat");
 const select = document.getElementById("characterSelect");
 
@@ -124,7 +125,7 @@ select.onchange=()=>{
 
 // ===== LLAMAR DEEPSEEK API =====
 async function callDeepseek(prompt){
-  const apiKey = "TU_API_KEY"; // reemplaza con tu API Key
+  const apiKey = "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";
 
   const response = await fetch("https://openrouter.ai/deepseek/deepseek-v3.2", {
     method:"POST",
