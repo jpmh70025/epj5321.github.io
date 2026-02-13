@@ -13,9 +13,18 @@
 
 <div class="header">RP Chat</div>
 
+<div class="creator">
+
+<input id="charName" placeholder="Nombre del personaje">
+<textarea id="charDesc" placeholder="Descripción del personaje"></textarea>
+<textarea id="charStart" placeholder="Mensaje inicial (*acciones*)"></textarea>
+
+<button onclick="createCharacter()">Crear personaje</button>
+
+</div>
+
 <div class="topbar">
 <select id="characterSelect"></select>
-<button onclick="newCharacter()">+ Crear</button>
 </div>
 
 <div id="chat"></div>
@@ -27,6 +36,3 @@
 
 </div>
 
-<script src="script.js"></script>
-</body>
-</html>
