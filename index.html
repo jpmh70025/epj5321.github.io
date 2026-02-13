@@ -3,40 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi RP AI</title>
-<style>
-body{font-family:sans-serif;margin:0;padding:0;background:#222;color:#fff;display:flex;flex-direction:column;height:100vh;}
-#chat{flex:1;overflow-y:auto;padding:10px;background-size:cover;}
-.msg{margin:5px;padding:5px;border-radius:5px;position:relative;}
-.msg.user{background:#444;text-align:right;}
-.msg.bot{background:#555;text-align:left;}
-.msg button{position:absolute;top:2px;right:2px;background:#900;color:#fff;border:none;border-radius:3px;cursor:pointer;}
-.action{font-weight:bold;}
-#controls{display:flex;flex-direction:column;padding:10px;background:#111;}
-#controls input, #controls button, #controls textarea{margin:3px 0;padding:5px;}
-</style>
+<title>RP AI</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+<h1>RP AI - Tus personajes</h1>
 
-<div id="chat"></div>
+<!-- Crear personaje -->
+<div id="crear-personaje">
+  <input type="text" id="nombrePersonaje" placeholder="Nombre del personaje">
+  <textarea id="descripcionPersonaje" placeholder="Descripción general"></textarea>
+  <textarea id="mensajeInicial" placeholder="Mensaje inicial del chat"></textarea>
+  <input type="file" id="avatarArchivo">
+  <input type="text" id="avatarURL" placeholder="O pega URL de imagen">
+  <button id="btnCrearPersonaje">Crear personaje</button>
+</div>
 
-<div id="controls">
+<!-- Selección de personaje -->
+<select id="selectorPersonaje">
+  <option value="">Selecciona un personaje</option>
+</select>
+<button id="btnEliminarPersonaje">Eliminar personaje</button>
 
-<select id="characterSelect"></select>
-
-<input type="text" id="charName" placeholder="Nombre del personaje">
-<textarea id="charDesc" placeholder="Descripción general"></textarea>
-<textarea id="charStart" placeholder="Mensaje inicial del personaje"></textarea>
-<input type="text" id="charBg" placeholder="URL de fondo (opcional)">
-<input type="text" id="charAvatar" placeholder="URL de avatar (opcional)">
-
-<input type="file" id="avatarUpload" accept="image/*">
-<button onclick="createCharacter()">Crear personaje</button>
-<button onclick="deleteCharacter()">Eliminar personaje</button>
-
-<input type="text" id="msg" placeholder="Escribe tu mensaje">
-<button onclick="send()">Enviar</button>
-
+<!-- Chat -->
+<div id="chatContainer">
+  <div id="chatMensajes"></div>
+  <textarea id="mensajeUsuario" placeholder="Escribe tu mensaje..."></textarea>
+  <button id="btnEnviar">Enviar</button>
 </div>
 
 <script src="script.js"></script>
