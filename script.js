@@ -104,11 +104,15 @@ async function createCharacter(){
   const name=document.getElementById("charName").value.trim();
   const desc=document.getElementById("charDesc").value.trim();
   const start=document.getElementById("charStart").value.trim();
-
   if(!name || !start) return;
 
-  // Generar avatar automáticamente
-  const avatarUrl = await generateCharacterImage(`${name}, anime character`);
+  // Verificar si usuario subió archivo o puso URL
+  let avatarUrl=document.getElementById("charAvatar").value.trim();
+
+  if(!avatarUrl){
+      // Generar avatar automáticamente con Novita.ai
+      avatarUrl = await generateCharacterImage(`${name}, anime character`);
+  }
 
   characters[name]={
     avatar: avatarUrl,
@@ -126,6 +130,8 @@ async function createCharacter(){
   document.getElementById("charName").value="";
   document.getElementById("charDesc").value="";
   document.getElementById("charStart").value="";
+  document.getElementById("charAvatar").value="";
+  document.getElementById("avatarUpload").value="";
 }
 
 // ===== ELIMINAR PERSONAJE =====
@@ -143,7 +149,6 @@ function deleteCharacter(){
 // ===== REFRESCAR SELECTOR =====
 function refreshCharacters(){
   select.innerHTML="";
-
   const base=document.createElement("option");
   base.value="";
   base.textContent="Selecciona personaje";
@@ -205,6 +210,18 @@ async function send(){
   characters[current].messages.push({role:"bot", text:reply});
   save();
   loadChat();
+}
+
+// ===== SUBIDA DE ARCHIVO PARA AVATAR =====
+document.getElementById("avatarUpload").onchange = async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    document.getElementById("charAvatar").value = reader.result; // base64
+  };
+  reader.readAsDataURL(file);
 }
 
 // ===== INIT =====
