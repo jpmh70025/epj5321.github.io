@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RP Chat</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="header">RP Chat</div>
+
+<div class="topbar">
+<select id="characterSelect"></select>
+<button onclick="newCharacter()">+ Crear</button>
+</div>
+
+<div id="chat"></div>
+
+<div class="input-area">
+<input id="msg" placeholder="Escribe algo..." />
+<button onclick="send()">Enviar</button>
+</div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
