@@ -16,14 +16,16 @@
 <div class="creator">
 
 <input id="charName" placeholder="Nombre del personaje">
-<textarea id="charDesc" placeholder="Descripción del personaje"></textarea>
-<textarea id="charStart" placeholder="Mensaje inicial (*acciones*)"></textarea>
+<input id="charAvatar" placeholder="URL imagen avatar">
+<input id="charBg" placeholder="URL fondo chat">
+
+<textarea id="charDesc" placeholder="Descripción"></textarea>
+<textarea id="charStart" placeholder="Mensaje inicial"></textarea>
 
 <button onclick="createCharacter()">Crear personaje</button>
+<button onclick="deleteCharacter()">Eliminar personaje</button>
 
 </div>
-
-<button onclick="deleteCharacter()">Eliminar personaje</button>
 
 <div class="topbar">
 <select id="characterSelect"></select>
@@ -38,4 +40,6 @@
 
 </div>
 
-
+<script src="script.js"></script>
+</body>
+</html>
