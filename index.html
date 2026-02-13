@@ -1,42 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RP Chat</title>
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi RP AI</title>
+<style>
+body{font-family:sans-serif;margin:0;padding:0;background:#222;color:#fff;display:flex;flex-direction:column;height:100vh;}
+#chat{flex:1;overflow-y:auto;padding:10px;background-size:cover;}
+.msg{margin:5px;padding:5px;border-radius:5px;position:relative;}
+.msg.user{background:#444;text-align:right;}
+.msg.bot{background:#555;text-align:left;}
+.msg button{position:absolute;top:2px;right:2px;background:#900;color:#fff;border:none;border-radius:3px;cursor:pointer;}
+.action{font-weight:bold;}
+#controls{display:flex;flex-direction:column;padding:10px;background:#111;}
+#controls input, #controls button, #controls textarea{margin:3px 0;padding:5px;}
+</style>
 </head>
-
 <body>
-
-<div class="app">
-
-<div class="header">RP Chat</div>
-
-<div class="creator">
-
-<input id="charName" placeholder="Nombre del personaje">
-<input id="charAvatar" placeholder="URL imagen avatar">
-<input id="charBg" placeholder="URL fondo chat">
-
-<textarea id="charDesc" placeholder="Descripción"></textarea>
-<textarea id="charStart" placeholder="Mensaje inicial"></textarea>
-
-<button onclick="createCharacter()">Crear personaje</button>
-<button onclick="deleteCharacter()">Eliminar personaje</button>
-
-</div>
-
-<div class="topbar">
-<select id="characterSelect"></select>
-</div>
 
 <div id="chat"></div>
 
-<div class="input-area">
-<input id="msg" placeholder="Escribe algo..." />
+<div id="controls">
+
+<select id="characterSelect"></select>
+
+<input type="text" id="charName" placeholder="Nombre del personaje">
+<textarea id="charDesc" placeholder="Descripción general"></textarea>
+<textarea id="charStart" placeholder="Mensaje inicial del personaje"></textarea>
+<input type="text" id="charBg" placeholder="URL de fondo (opcional)">
+<input type="text" id="charAvatar" placeholder="URL de avatar (opcional)">
+
+<input type="file" id="avatarUpload" accept="image/*">
+<button onclick="createCharacter()">Crear personaje</button>
+<button onclick="deleteCharacter()">Eliminar personaje</button>
+
+<input type="text" id="msg" placeholder="Escribe tu mensaje">
 <button onclick="send()">Enviar</button>
-</div>
 
 </div>
 
