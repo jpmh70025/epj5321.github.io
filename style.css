@@ -9,3 +9,17 @@ select{
  padding:8px;
  border-radius:8px;
 }
+
+.creator{
+ display:flex;
+ flex-direction:column;
+ gap:6px;
+ margin-bottom:12px;
+}
+
+textarea{
+ padding:8px;
+ border-radius:8px;
+ border:none;
+ resize:none;
+}
