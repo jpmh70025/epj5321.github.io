@@ -1,229 +1,129 @@
-// ===== VARIABLES =====
-const chat = document.getElementById("chat");
-const select = document.getElementById("characterSelect");
+// script.js
 
-let characters = JSON.parse(localStorage.getItem("characters")) || {};
-let current = null;
+// URL de tu backend Vercel
+const BACKEND_URL = "https://rp-ai-ten.vercel.app";
 
-// ===== GUARDAR MEMORIA =====
-function save(){
-  localStorage.setItem("characters", JSON.stringify(characters));
-}
+let personajes = {};  // Guarda personajes {nombre: {descripcion, mensajeInicial, avatar, memoria}}
+let personajeActual = null;
 
-// ===== ACCIONES *texto* =====
-function parseNarrator(text){
-  return text.replace(/\*(.*?)\*/g,'<span class="action">*$1*</span>');
-}
-
-// ===== MOSTRAR MENSAJE =====
-function addMessage(text,type,index){
-  const div=document.createElement("div");
-  div.className="msg "+type;
-
-  const span=document.createElement("span");
-  span.innerHTML=parseNarrator(text);
-  div.appendChild(span);
-
-  // botón borrar mensaje
-  const del=document.createElement("button");
-  del.textContent="✖";
-  del.onclick=()=>{
-    characters[current].messages.splice(index,1);
-    save();
-    loadChat();
-  };
-  div.appendChild(del);
-
-  chat.appendChild(div);
-  chat.scrollTop=chat.scrollHeight;
-}
-
-// ===== LLAMAR NOVITA.AI PARA GENERAR AVATAR =====
-async function generateCharacterImage(prompt) {
-    const apiKey = "sk_aN3FIA4Sex0DlnYlp2XxSp92ZbeDcEeS9P1OHy9URr8";
-    const url = "https://api.novita.ai/v3/text2img";
-
-    const fullPrompt = `score_9, score_8_up, score_7_up, rating_explicit, ${prompt}`;
-    const negativePrompt = "score_6, score_5, score_4, low quality, bad anatomy";
-
-    const body = {
-        model: "ponydiffusionv6xl_v6_321454.safetensors",
-        prompt: fullPrompt,
-        negative_prompt: negativePrompt,
-        width: 512,
-        height: 512,
-        steps: 28
-    };
-
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-
-        const data = await response.json();
-        return data.image_url || "";
-    } catch (err) {
-        console.error("Error generando imagen:", err);
-        return "";
-    }
-}
-
-// ===== LLAMAR DEEPSEEK API PARA RESPUESTAS =====
+// --- Funciones de backend ---
 async function callDeepseek(prompt){
-  const apiKey = "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";
-
   try {
-      const response = await fetch("https://openrouter.ai/deepseek/deepseek-v3.2", {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model:"deepseek-v3.2",
-          input: prompt,
-          max_tokens: 500
-        })
-      });
-
-      const data = await response.json();
-      return data.output || "Error: no se recibió respuesta";
+    const res = await fetch(`${BACKEND_URL}/api/deepseek`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    return data.output || "Error: no se recibió respuesta";
   } catch(err) {
-      console.error("Error Deepseek:", err);
-      return "Error al generar respuesta";
+    console.error("Error Deepseek:", err);
+    return "Error al generar respuesta";
   }
 }
 
-// ===== CREAR PERSONAJE =====
-async function createCharacter(){
-  const name=document.getElementById("charName").value.trim();
-  const desc=document.getElementById("charDesc").value.trim();
-  const start=document.getElementById("charStart").value.trim();
-  if(!name || !start) return;
-
-  // Verificar si usuario subió archivo o puso URL
-  let avatarUrl=document.getElementById("charAvatar").value.trim();
-
-  if(!avatarUrl){
-      // Generar avatar automáticamente con Novita.ai
-      avatarUrl = await generateCharacterImage(`${name}, anime character`);
+async function generateCharacterImage(prompt){
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/novita`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    return data.image_url || "";
+  } catch(err) {
+    console.error("Error generando imagen:", err);
+    return "";
   }
+}
 
-  characters[name]={
-    avatar: avatarUrl,
-    bg:"",
-    desc:desc,
-    messages:[{role:"bot", text:start}]
+// --- Manejo de personajes ---
+function actualizarSelector() {
+  const selector = document.getElementById("selectorPersonaje");
+  selector.innerHTML = `<option value="">Selecciona un personaje</option>`;
+  for (let nombre in personajes){
+    const option = document.createElement("option");
+    option.value = nombre;
+    option.textContent = nombre;
+    selector.appendChild(option);
+  }
+}
+
+function crearPersonaje() {
+  const nombre = document.getElementById("nombrePersonaje").value.trim();
+  if(!nombre) return alert("Ponle un nombre al personaje");
+  const descripcion = document.getElementById("descripcionPersonaje").value;
+  const mensajeInicial = document.getElementById("mensajeInicial").value;
+  const avatarURL = document.getElementById("avatarURL").value;
+  const avatarArchivo = document.getElementById("avatarArchivo").files[0];
+
+  personajes[nombre] = {
+    descripcion,
+    mensajeInicial,
+    avatar: avatarURL,
+    memoria: []
   };
 
-  current=name;
-  save();
-  refreshCharacters();
-  loadChat();
-
-  // limpiar inputs
-  document.getElementById("charName").value="";
-  document.getElementById("charDesc").value="";
-  document.getElementById("charStart").value="";
-  document.getElementById("charAvatar").value="";
-  document.getElementById("avatarUpload").value="";
-}
-
-// ===== ELIMINAR PERSONAJE =====
-function deleteCharacter(){
-  if(!current) return;
-  if(!confirm("¿Eliminar personaje?")) return;
-
-  delete characters[current];
-  current=null;
-  save();
-  refreshCharacters();
-  loadChat();
-}
-
-// ===== REFRESCAR SELECTOR =====
-function refreshCharacters(){
-  select.innerHTML="";
-  const base=document.createElement("option");
-  base.value="";
-  base.textContent="Selecciona personaje";
-  select.appendChild(base);
-
-  Object.keys(characters).forEach(name=>{
-    const opt=document.createElement("option");
-    opt.value=name;
-    opt.textContent=name;
-    select.appendChild(opt);
-  });
-
-  if(Object.keys(characters).length>0){
-    current=Object.keys(characters)[0];
-    select.value=current;
+  if(avatarArchivo){
+    const reader = new FileReader();
+    reader.onload = e => {
+      personajes[nombre].avatar = e.target.result;
+    }
+    reader.readAsDataURL(avatarArchivo);
   }
+
+  actualizarSelector();
+  alert(`Personaje ${nombre} creado`);
 }
 
-// ===== CARGAR CHAT =====
-function loadChat(){
-  chat.innerHTML="";
-  if(!current) return;
-  const data=characters[current];
-
-  // fondo chat
-  chat.style.backgroundImage = data.bg ? `url(${data.bg})` : "none";
-  chat.style.backgroundSize = "cover";
-
-  data.messages.forEach((m,i)=>{
-    addMessage(m.text, m.role==="user"?"user":"bot", i);
-  });
+function eliminarPersonaje() {
+  const selector = document.getElementById("selectorPersonaje");
+  const nombre = selector.value;
+  if(!nombre) return alert("Selecciona un personaje para eliminar");
+  delete personajes[nombre];
+  personajeActual = null;
+  actualizarSelector();
+  document.getElementById("chatMensajes").innerHTML = "";
 }
 
-// ===== CAMBIAR PERSONAJE =====
-select.onchange=()=>{
-  current=select.value || null;
-  loadChat();
+// --- Manejo de chat ---
+async function enviarMensaje() {
+  if(!personajeActual) return alert("Selecciona un personaje");
+  const input = document.getElementById("mensajeUsuario");
+  const mensaje = input.value.trim();
+  if(!mensaje) return;
+  input.value = "";
+
+  // Guardar mensaje en memoria
+  personajes[personajeActual].memoria.push(`Usuario: ${mensaje}`);
+  appendMensaje("Tú", mensaje);
+
+  // Construir prompt con memoria
+  const memoria = personajes[personajeActual].memoria.join("\n");
+  const prompt = `${personajeActual} (${personajes[personajeActual].descripcion})\n${memoria}\nMensaje:`;  
+
+  const respuesta = await callDeepseek(prompt);
+  personajes[personajeActual].memoria.push(`${personajeActual}: ${respuesta}`);
+  appendMensaje(personajeActual, respuesta);
 }
 
-// ===== ENVIAR MENSAJE =====
-async function send(){
-  const input=document.getElementById("msg");
-  const text=input.value.trim();
-  if(!text || !current) return;
-
-  // guardar mensaje del usuario
-  characters[current].messages.push({role:"user", text:text});
-  addMessage(text,"user", characters[current].messages.length-1);
-
-  input.value="";
-
-  // preparar prompt con contexto y descripción
-  const prompt = `Eres el personaje ${current}. Responde en español, incluyendo acciones entre *asteriscos*. Contexto: ${characters[current].desc}\nUsuario: ${text}`;
-
-  // llamar a Deepseek
-  const reply = await callDeepseek(prompt);
-
-  // guardar respuesta de IA
-  characters[current].messages.push({role:"bot", text:reply});
-  save();
-  loadChat();
+function appendMensaje(autor, mensaje){
+  const cont = document.getElementById("chatMensajes");
+  const div = document.createElement("div");
+  div.innerHTML = `<b>${autor}:</b> ${mensaje}`;
+  cont.appendChild(div);
+  cont.scrollTop = cont.scrollHeight;
 }
 
-// ===== SUBIDA DE ARCHIVO PARA AVATAR =====
-document.getElementById("avatarUpload").onchange = async (e) => {
-  const file = e.target.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    document.getElementById("charAvatar").value = reader.result; // base64
-  };
-  reader.readAsDataURL(file);
-}
-
-// ===== INIT =====
-refreshCharacters();
-loadChat();
+// --- Eventos ---
+document.getElementById("btnCrearPersonaje").addEventListener("click", crearPersonaje);
+document.getElementById("btnEliminarPersonaje").addEventListener("click", eliminarPersonaje);
+document.getElementById("selectorPersonaje").addEventListener("change", e => {
+  personajeActual = e.target.value;
+  document.getElementById("chatMensajes").innerHTML = "";
+  if(personajeActual && personajes[personajeActual].mensajeInicial){
+    appendMensaje(personajeActual, personajes[personajeActual].mensajeInicial);
+    personajes[personajeActual].memoria.push(`${personajeActual}: ${personajes[personajeActual].mensajeInicial}`);
+  }
+});
+document.getElementById("btnEnviar").addEventListener("click", enviarMensaje);
