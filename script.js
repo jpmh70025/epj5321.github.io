@@ -38,20 +38,82 @@ function addMessage(text,type,index){
   chat.scrollTop=chat.scrollHeight;
 }
 
+// ===== LLAMAR NOVITA.AI PARA GENERAR AVATAR =====
+async function generateCharacterImage(prompt) {
+    const apiKey = "sk_aN3FIA4Sex0DlnYlp2XxSp92ZbeDcEeS9P1OHy9URr8";
+    const url = "https://api.novita.ai/v3/text2img";
+
+    const fullPrompt = `score_9, score_8_up, score_7_up, rating_explicit, ${prompt}`;
+    const negativePrompt = "score_6, score_5, score_4, low quality, bad anatomy";
+
+    const body = {
+        model: "ponydiffusionv6xl_v6_321454.safetensors",
+        prompt: fullPrompt,
+        negative_prompt: negativePrompt,
+        width: 512,
+        height: 512,
+        steps: 28
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+        return data.image_url || "";
+    } catch (err) {
+        console.error("Error generando imagen:", err);
+        return "";
+    }
+}
+
+// ===== LLAMAR DEEPSEEK API PARA RESPUESTAS =====
+async function callDeepseek(prompt){
+  const apiKey = "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";
+
+  try {
+      const response = await fetch("https://openrouter.ai/deepseek/deepseek-v3.2", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model:"deepseek-v3.2",
+          input: prompt,
+          max_tokens: 500
+        })
+      });
+
+      const data = await response.json();
+      return data.output || "Error: no se recibió respuesta";
+  } catch(err) {
+      console.error("Error Deepseek:", err);
+      return "Error al generar respuesta";
+  }
+}
+
 // ===== CREAR PERSONAJE =====
-function createCharacter(){
+async function createCharacter(){
   const name=document.getElementById("charName").value.trim();
-  const avatar=document.getElementById("charAvatar").value.trim();
-  const bg=document.getElementById("charBg").value.trim();
   const desc=document.getElementById("charDesc").value.trim();
   const start=document.getElementById("charStart").value.trim();
 
   if(!name || !start) return;
 
+  // Generar avatar automáticamente
+  const avatarUrl = await generateCharacterImage(`${name}, anime character`);
+
   characters[name]={
-    avatar: avatar,
-    bg: bg,
-    desc: desc,
+    avatar: avatarUrl,
+    bg:"",
+    desc:desc,
     messages:[{role:"bot", text:start}]
   };
 
@@ -62,8 +124,6 @@ function createCharacter(){
 
   // limpiar inputs
   document.getElementById("charName").value="";
-  document.getElementById("charAvatar").value="";
-  document.getElementById("charBg").value="";
   document.getElementById("charDesc").value="";
   document.getElementById("charStart").value="";
 }
@@ -121,27 +181,6 @@ function loadChat(){
 select.onchange=()=>{
   current=select.value || null;
   loadChat();
-}
-
-// ===== LLAMAR DEEPSEEK API =====
-async function callDeepseek(prompt){
-  const apiKey = "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";
-
-  const response = await fetch("https://openrouter.ai/deepseek/deepseek-v3.2", {
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization": `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model:"deepseek-v3.2",
-      input: prompt,
-      max_tokens: 500
-    })
-  });
-
-  const data = await response.json();
-  return data.output || "Error: no se recibió respuesta";
 }
 
 // ===== ENVIAR MENSAJE =====
