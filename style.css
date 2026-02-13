@@ -23,3 +23,64 @@ textarea{
  border:none;
  resize:none;
 }
+
+
+body{
+ margin:0;
+ font-family:sans-serif;
+ background:#111;
+ color:white;
+}
+
+.app{
+ max-width:600px;
+ margin:auto;
+ padding:10px;
+}
+
+.header{
+ font-size:20px;
+ margin-bottom:10px;
+}
+
+.creator{
+ display:flex;
+ flex-direction:column;
+ gap:6px;
+}
+
+#chat{
+ height:60vh;
+ overflow-y:auto;
+ margin-top:10px;
+ padding:10px;
+ border-radius:10px;
+ background:#1b1b1b;
+ background-size:cover;
+}
+
+.msg{
+ margin:6px 0;
+ padding:6px 10px;
+ border-radius:10px;
+ background:#2a2a2a;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.msg.user{
+ background:#0044ff55;
+}
+
+.action{
+ font-style:italic;
+ font-weight:bold;
+}
+
+button{
+ border:none;
+ padding:8px;
+ border-radius:8px;
+ cursor:pointer;
+}
