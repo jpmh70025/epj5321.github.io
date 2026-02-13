@@ -45,7 +45,31 @@ function refreshCharacters(){
  loadChat();
 }
 
-function newCharacter(){
+function createCharacter(){
+
+ const name = document.getElementById("charName").value;
+ const desc = document.getElementById("charDesc").value;
+ const start = document.getElementById("charStart").value;
+
+ if(!name || !start) return;
+
+ characters[name] = {
+   desc: desc,
+   messages:[
+     {role:"bot", text:start}
+   ]
+ };
+
+ current = name;
+
+ save();
+ refreshCharacters();
+
+ document.getElementById("charName").value="";
+ document.getElementById("charDesc").value="";
+ document.getElementById("charStart").value="";
+}
+
 
  const name = prompt("Nombre del personaje:");
  if(!name) return;
@@ -125,3 +149,4 @@ function send(){
 
 // ====== INIT ======
 refreshCharacters();
+
