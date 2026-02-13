@@ -11,28 +11,25 @@ function save(){
 }
 
 
-// ===== TEXTO ACCIONES =====
+// ===== ACCIONES *texto* =====
 function parseNarrator(text){
- return text.replace(/\*(.*?)\*/g,
- '<span class="action">*$1*</span>');
+ return text.replace(/\*(.*?)\*/g,'<span class="action">*$1*</span>');
 }
 
 
-// ===== MENSAJES =====
+// ===== MENSAJE VISUAL =====
 function addMessage(text,type,index){
 
  const div=document.createElement("div");
  div.className="msg "+type;
 
- const content=document.createElement("span");
- content.innerHTML=parseNarrator(text);
+ const span=document.createElement("span");
+ span.innerHTML=parseNarrator(text);
 
- div.appendChild(content);
+ div.appendChild(span);
 
- // botón borrar mensaje
  const del=document.createElement("button");
  del.textContent="✖";
- del.style.marginLeft="8px";
 
  del.onclick=()=>{
    characters[current].messages.splice(index,1);
@@ -41,9 +38,7 @@ function addMessage(text,type,index){
  };
 
  div.appendChild(del);
-
  chat.appendChild(div);
- chat.scrollTop=chat.scrollHeight;
 }
 
 
@@ -51,12 +46,16 @@ function addMessage(text,type,index){
 function createCharacter(){
 
  const name=document.getElementById("charName").value.trim();
+ const avatar=document.getElementById("charAvatar").value.trim();
+ const bg=document.getElementById("charBg").value.trim();
  const desc=document.getElementById("charDesc").value.trim();
  const start=document.getElementById("charStart").value.trim();
 
  if(!name || !start) return;
 
  characters[name]={
+   avatar:avatar,
+   bg:bg,
    desc:desc,
    messages:[{role:"bot",text:start}]
  };
@@ -71,42 +70,34 @@ function createCharacter(){
 
 // ===== ELIMINAR PERSONAJE =====
 function deleteCharacter(){
-
  if(!current) return;
-
- if(!confirm("Eliminar personaje?")) return;
-
  delete characters[current];
-
  current=null;
-
  save();
  refreshCharacters();
  loadChat();
 }
 
 
-// ===== REFRESCAR SELECTOR =====
+// ===== SELECTOR =====
 function refreshCharacters(){
 
  select.innerHTML="";
 
- const first=document.createElement("option");
- first.textContent="Selecciona personaje";
- first.value="";
- select.appendChild(first);
+ const base=document.createElement("option");
+ base.value="";
+ base.textContent="Selecciona personaje";
+ select.appendChild(base);
 
- const names=Object.keys(characters);
-
- names.forEach(name=>{
+ Object.keys(characters).forEach(name=>{
    const opt=document.createElement("option");
    opt.value=name;
    opt.textContent=name;
    select.appendChild(opt);
  });
 
- if(names.length>0){
-   current=names[0];
+ if(Object.keys(characters).length>0){
+   current=Object.keys(characters)[0];
    select.value=current;
  }
 }
@@ -117,9 +108,18 @@ function loadChat(){
 
  chat.innerHTML="";
 
- if(!current || !characters[current]) return;
+ if(!current) return;
 
- characters[current].messages.forEach((m,i)=>{
+ const data=characters[current];
+
+ // fondo personalizado
+ if(data.bg){
+   chat.style.backgroundImage=`url(${data.bg})`;
+ }else{
+   chat.style.backgroundImage="none";
+ }
+
+ data.messages.forEach((m,i)=>{
    addMessage(m.text,m.role==="user"?"user":"bot",i);
  });
 }
@@ -134,7 +134,7 @@ select.onchange=()=>{
 
 // ===== IA TEMPORAL =====
 function fakeAI(text){
- return "*El personaje piensa un momento* Dijiste: "+text;
+ return "*El personaje te observa en silencio* Dijiste: "+text;
 }
 
 
@@ -146,28 +146,16 @@ function send(){
 
  if(!text || !current) return;
 
- addMessage(text,"user");
+ characters[current].messages.push({role:"user",text:text});
 
- characters[current].messages.push({
-   role:"user",
-   text:text
- });
+ const reply=fakeAI(text);
+
+ characters[current].messages.push({role:"bot",text:reply});
+
+ save();
+ loadChat();
 
  input.value="";
-
- setTimeout(()=>{
-
-   const reply=fakeAI(text);
-
-   characters[current].messages.push({
-     role:"bot",
-     text:reply
-   });
-
-   save();
-   loadChat();
-
- },400);
 }
 
 
