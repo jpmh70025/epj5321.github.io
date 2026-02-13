@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://rp-285xk2fa6-juan-pablos-projects-9dd96ead.vercel.app/";
+const BACKEND_URL = "https://rp-ai-ten.vercel.app/";
 
 let personajes = {};
 let personajeActual = null;
@@ -109,4 +109,5 @@ document.getElementById("selectorPersonaje").addEventListener("change",e=>{
   }
 });
 document.getElementById("btnEnviar").addEventListener("click",enviarMensaje);
+
 
