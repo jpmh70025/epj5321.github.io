@@ -125,7 +125,7 @@ select.onchange=()=>{
 
 // ===== LLAMAR DEEPSEEK API =====
 async function callDeepseek(prompt){
-  const apiKey = "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";
+  const apiKey = "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";
 
   const response = await fetch("https://openrouter.ai/deepseek/deepseek-v3.2", {
     method:"POST",
