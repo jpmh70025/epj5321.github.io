@@ -5,12 +5,13 @@ let characters = JSON.parse(localStorage.getItem("characters")) || {};
 let current = null;
 
 
-// ====== UTIL ======
-
+// ===== GUARDAR =====
 function save(){
  localStorage.setItem("characters", JSON.stringify(characters));
 }
 
+
+// ===== TEXTO NARRADOR =====
 function parseNarrator(text){
  return text.replace(/\*(.*?)\*/g,
  '<span class="action">*$1*</span>');
@@ -25,53 +26,17 @@ function addMessage(text,type){
 }
 
 
-// ====== PERSONAJES ======
-
-function refreshCharacters(){
-
- select.innerHTML="";
-
- const names = Object.keys(characters);
-
- names.forEach(name=>{
-   const opt = document.createElement("option");
-   opt.value = name;
-   opt.textContent = name;
-   select.appendChild(opt);
- });
-
- if(names.length > 0){
-   current = names[names.length-1];
-   select.value = current;
- }
-
- loadChat();
-}
-
-
- select.innerHTML="";
-
- for(let name in characters){
-   const opt=document.createElement("option");
-   opt.value=name;
-   opt.textContent=name;
-   select.appendChild(opt);
- }
-
- if(!current && Object.keys(characters).length>0){
-   current = Object.keys(characters)[0];
- }
-
- loadChat();
-}
-
+// ===== CREAR PERSONAJE =====
 function createCharacter(){
 
- const name = document.getElementById("charName").value;
- const desc = document.getElementById("charDesc").value;
- const start = document.getElementById("charStart").value;
+ const name = document.getElementById("charName").value.trim();
+ const desc = document.getElementById("charDesc").value.trim();
+ const start = document.getElementById("charStart").value.trim();
 
- if(!name || !start) return;
+ if(!name || !start){
+   alert("Falta nombre o mensaje inicial");
+   return;
+ }
 
  characters[name] = {
    desc: desc,
@@ -84,6 +49,7 @@ function createCharacter(){
 
  save();
  refreshCharacters();
+ loadChat();
 
  document.getElementById("charName").value="";
  document.getElementById("charDesc").value="";
@@ -91,33 +57,28 @@ function createCharacter(){
 }
 
 
- const name = prompt("Nombre del personaje:");
- if(!name) return;
+// ===== REFRESCAR LISTA =====
+function refreshCharacters(){
 
- const desc = prompt("Descripción general:");
- const start = prompt("Mensaje inicial:");
+ select.innerHTML="";
 
- characters[name] = {
-   desc: desc,
-   messages: [
-     {role:"bot", text:start}
-   ]
- };
+ const names = Object.keys(characters);
 
- current = name;
+ names.forEach(name=>{
+   const opt=document.createElement("option");
+   opt.value=name;
+   opt.textContent=name;
+   select.appendChild(opt);
+ });
 
- save();
- refreshCharacters();
+ if(names.length>0){
+   current = names[names.length-1];
+   select.value=current;
+ }
 }
 
-select.onchange = ()=>{
- current = select.value;
- loadChat();
-};
 
-
-// ====== CHAT ======
-
+// ===== CARGAR CHAT =====
 function loadChat(){
 
  chat.innerHTML="";
@@ -129,15 +90,25 @@ function loadChat(){
  });
 }
 
-function fakeAI(userText){
 
- return "*El personaje te observa* Dijiste: " + userText;
+// ===== CAMBIAR PERSONAJE =====
+select.onchange = ()=>{
+ current = select.value;
+ loadChat();
+};
+
+
+// ===== IA FALSA (TEMPORAL) =====
+function fakeAI(text){
+ return "*El personaje te mira fijamente* Dijiste: " + text;
 }
 
+
+// ===== ENVIAR MENSAJE =====
 function send(){
 
- const input = document.getElementById("msg");
- const text = input.value;
+ const input=document.getElementById("msg");
+ const text=input.value.trim();
 
  if(!text || !current) return;
 
@@ -152,7 +123,7 @@ function send(){
 
  setTimeout(()=>{
 
-   const reply = fakeAI(text);
+   const reply=fakeAI(text);
 
    addMessage(reply,"bot");
 
@@ -163,11 +134,10 @@ function send(){
 
    save();
 
- },500);
+ },400);
 }
 
 
-// ====== INIT ======
+// ===== INICIO =====
 refreshCharacters();
-
-
+loadChat();
